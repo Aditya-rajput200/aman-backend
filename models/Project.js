@@ -23,7 +23,7 @@ const projectSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['wedding-film', 'commercial', 'documentary', 'music-video', 'portrait', 'fashion', 'event', 'corporate', 'creative']
+    enum: ['wedding-film', 'commercial', 'documentary', 'music-video', 'portrait', 'photography', 'fashion', 'event', 'corporate', 'creative']
   },
   subcategory: {
     type: String,

@@ -1,6 +1,31 @@
 const Project = require('../models/Project');
 const { serializeProject } = require('../utils/serializers');
 
+const VALID_CATEGORIES = new Set([
+  'wedding-film',
+  'commercial',
+  'documentary',
+  'music-video',
+  'portrait',
+  'photography',
+  'fashion',
+  'event',
+  'corporate',
+  'creative'
+]);
+
+const CATEGORY_ALIASES = {
+  wedding: 'wedding-film',
+  weddings: 'wedding-film',
+  'wedding films': 'wedding-film',
+  'wedding film': 'wedding-film',
+  'music video': 'music-video',
+  'music videos': 'music-video',
+  photo: 'photography',
+  photos: 'photography',
+  photography: 'photography'
+};
+
 const asArray = (value) => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
@@ -13,6 +38,18 @@ const asArray = (value) => {
     }
   }
   return [];
+};
+
+const normalizeCategory = (value) => {
+  if (typeof value !== 'string') return value;
+
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return '';
+
+  const mapped = CATEGORY_ALIASES[trimmed]
+    || trimmed.replace(/[_\s]+/g, '-').replace(/-+/g, '-');
+
+  return VALID_CATEGORIES.has(mapped) ? mapped : value;
 };
 
 const normalizeProjectPayload = (payload = {}) => {
@@ -53,6 +90,7 @@ const normalizeProjectPayload = (payload = {}) => {
 
   return {
     ...payload,
+    category: payload.category !== undefined ? normalizeCategory(payload.category) : payload.category,
     video_urls: videoUrls,
     images,
     featured: payload.featured === true || payload.featured === 'true',
@@ -105,6 +143,9 @@ const createProject = async (req, res) => {
     res.status(201).json(serializeProject(savedProject));
   } catch (error) {
     console.error('Error creating project:', error);
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Failed to create project' });
   }
 };
@@ -128,6 +169,9 @@ const updateProject = async (req, res) => {
     res.json(serializeProject(project));
   } catch (error) {
     console.error('Error updating project:', error);
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Failed to update project' });
   }
 };

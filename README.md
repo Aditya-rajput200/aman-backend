@@ -66,7 +66,6 @@ A simple Express.js backend with MongoDB and Cloudinary to replace Supabase for 
 
 ### Auth
 - `POST /api/auth/login` - Admin login
-- `POST /api/auth/register` - Register admin user
 - `GET /api/auth/me` - Get authenticated admin
 
 ## File Uploads
@@ -109,16 +108,12 @@ NEXT_PUBLIC_API_URL=http://localhost:3001/api
 3. Add them to your `.env` file
 4. Files will be automatically uploaded to your Cloudinary account
 
-## Default Admin User
+## Admin Login Credentials
 
-Create an admin user by making a POST request to:
+Set admin credentials in `.env` and use them for login:
 ```
-POST /api/auth/register
-{
-  "email": "admin@example.com",
-  "password": "your_password",
-  "username": "admin"
-}
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_password
 ```
 
 ## MongoDB vs MySQL Changes

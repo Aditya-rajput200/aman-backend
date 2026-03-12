@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const AdminUser = require('../models/AdminUser');
 
 const getTokenFromRequest = (req) => {
   const authHeader = req.headers.authorization || '';
@@ -15,16 +14,18 @@ const requireAdminAuth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await AdminUser.findById(decoded.userId).select('-password');
-
-    if (!admin) {
+    if (
+      decoded.userId !== 'env-admin' ||
+      decoded.email !== process.env.ADMIN_EMAIL ||
+      decoded.role !== 'admin'
+    ) {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
     req.adminUser = {
-      id: String(admin._id),
-      email: admin.email,
-      username: admin.username || admin.email
+      id: 'env-admin',
+      email: process.env.ADMIN_EMAIL,
+      username: process.env.ADMIN_EMAIL
     };
 
     next();
