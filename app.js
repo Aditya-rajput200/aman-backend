@@ -4,13 +4,38 @@ const connectDB = require('./config/database');
 
 const app = express();
 
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow server-to-server requests and tools that do not send an Origin header.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
 // Connect to MongoDB once per runtime lifecycle
 connectDB().catch((error) => {
   console.error('Initial MongoDB connection failed:', error.message);
 });
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
