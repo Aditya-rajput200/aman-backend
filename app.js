@@ -16,8 +16,13 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    // If no specific origins configured, allow all (reflect request origin).
+    if (allowedOrigins.length === 0) {
+      return callback(null, origin);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, origin);
     }
 
     return callback(new Error(`CORS blocked for origin: ${origin}`));
