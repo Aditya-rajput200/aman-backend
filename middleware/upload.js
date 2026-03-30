@@ -1,9 +1,10 @@
 const multer = require('multer');
-const { storage } = require('../config/cloudinary');
+
+const memoryStorage = multer.memoryStorage();
 
 // Configure multer for multiple file uploads
 const uploadMultiple = multer({
-  storage: storage,
+  storage: memoryStorage,
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit per file
     files: 10 // Maximum 10 files at once
@@ -12,7 +13,7 @@ const uploadMultiple = multer({
     // Accept images and videos
     const allowedTypes = [
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png',
       'image/gif',
       'image/webp',
@@ -21,7 +22,7 @@ const uploadMultiple = multer({
       'video/avi',
       'video/webm'
     ];
-    
+
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -32,7 +33,7 @@ const uploadMultiple = multer({
 
 // Configure multer for single file upload (for thumbnails)
 const uploadSingle = multer({
-  storage: storage,
+  storage: memoryStorage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit for single file
   },
@@ -40,12 +41,12 @@ const uploadSingle = multer({
     // Accept images only for thumbnails
     const allowedTypes = [
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png',
       'image/gif',
       'image/webp'
     ];
-    
+
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -56,7 +57,7 @@ const uploadSingle = multer({
 
 // Configure multer for about page photo
 const uploadAboutPhoto = multer({
-  storage: storage,
+  storage: memoryStorage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for about photo
   },
@@ -64,12 +65,12 @@ const uploadAboutPhoto = multer({
     // Accept images only for about photo
     const allowedTypes = [
       'image/jpeg',
-      'image/jpg', 
+      'image/jpg',
       'image/png',
       'image/gif',
       'image/webp'
     ];
-    
+
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {

@@ -4,6 +4,14 @@ const { cloudinary } = require('../config/cloudinary');
 const { uploadMultiple, uploadSingle, uploadAboutPhoto } = require('../middleware/upload');
 const { requireAdminAuth } = require('../middleware/adminAuth');
 
+const uploadBufferToCloudinary = (buffer, options = {}) =>
+  new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { folder: 'portfolio', transformation: [{ width: 1200, crop: 'limit' }], ...options },
+      (error, result) => (error ? reject(error) : resolve(result))
+    ).end(buffer);
+  });
+
 // Upload multiple files
 router.post('/multiple', requireAdminAuth, uploadMultiple.array('files', 10), async (req, res) => {
   try {
@@ -11,14 +19,17 @@ router.post('/multiple', requireAdminAuth, uploadMultiple.array('files', 10), as
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    const uploadedFiles = req.files.map(file => ({
-      url: file.path,
-      filename: file.filename,
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      public_id: file.filename,
-      folder: 'portfolio'
+    const uploadedFiles = await Promise.all(req.files.map(async (file) => {
+      const result = await uploadBufferToCloudinary(file.buffer);
+      return {
+        url: result.secure_url,
+        filename: result.public_id,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: result.bytes,
+        public_id: result.public_id,
+        folder: 'portfolio'
+      };
     }));
 
     res.json({
@@ -38,13 +49,14 @@ router.post('/single', requireAdminAuth, uploadSingle.single('file'), async (req
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const result = await uploadBufferToCloudinary(req.file.buffer);
     const uploadedFile = {
-      url: req.file.path,
-      filename: req.file.filename,
+      url: result.secure_url,
+      filename: result.public_id,
       originalname: req.file.originalname,
       mimetype: req.file.mimetype,
-      size: req.file.size,
-      public_id: req.file.filename,
+      size: result.bytes,
+      public_id: result.public_id,
       folder: 'portfolio'
     };
 
@@ -65,13 +77,14 @@ router.post('/about-photo', requireAdminAuth, uploadAboutPhoto.single('file'), a
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const result = await uploadBufferToCloudinary(req.file.buffer);
     const uploadedFile = {
-      url: req.file.path,
-      filename: req.file.filename,
+      url: result.secure_url,
+      filename: result.public_id,
       originalname: req.file.originalname,
       mimetype: req.file.mimetype,
-      size: req.file.size,
-      public_id: req.file.filename,
+      size: result.bytes,
+      public_id: result.public_id,
       folder: 'portfolio'
     };
 
